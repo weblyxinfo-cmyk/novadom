@@ -1,0 +1,1249 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>NovaDom — Správa domů &amp; zahrad</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+--dk:#0f0e0b;--w:#ffffff;--p:#f8f5f0;--p2:#f1ece4;
+--ink:#1c1912;--mu:#8c8070;--ln:#e0d8cc;
+--gr:#5a7855;--gr2:#789e72;--ter:#c4704a;--gld:#a88840;
+}
+html{scroll-behavior:smooth}
+body{font-family:'DM Sans',sans-serif;color:var(--ink);background:var(--w);line-height:1.6;overflow-x:hidden}
+::-webkit-scrollbar{width:3px}
+::-webkit-scrollbar-track{background:var(--p)}
+::-webkit-scrollbar-thumb{background:var(--ln)}
+img{display:block;max-width:100%;object-fit:cover}
+a{color:inherit;text-decoration:none}
+button{cursor:pointer;font-family:inherit;border:none;background:none}
+h1,h2,h3,h4{font-family:'DM Serif Display',serif;font-weight:400;line-height:1.15}
+h1 em,h2 em,h3 em{font-style:italic;color:var(--gr)}
+.mw{max-width:1240px;margin:0 auto}
+
+/* ─── NAV ─── */
+.nv{position:fixed;top:0;left:0;width:100%;z-index:100;padding:1rem 3rem;display:flex;align-items:center;gap:2rem;transition:background .35s,border .35s,backdrop-filter .35s}
+.nv.sc{background:rgba(255,255,255,.82);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid var(--ln)}
+.nl{font-family:'DM Serif Display',serif;font-size:1.45rem;letter-spacing:-.02em;white-space:nowrap}
+.nl em{font-style:italic;color:var(--gr)}
+.nv-links{display:flex;gap:1.8rem;margin-left:auto;align-items:center}
+.nv-links a{font-size:.85rem;font-weight:500;letter-spacing:.03em;text-transform:uppercase;position:relative;transition:color .2s}
+.nv-links a::after{content:'';position:absolute;bottom:-3px;left:0;width:0;height:2px;background:var(--gr);transition:width .25s}
+.nv-links a:hover::after,.nv-links a.act::after{width:100%}
+.nv-links a.act{color:var(--gr)}
+.lng-sw{display:flex;gap:0}
+.lng-sw button{font-size:.72rem;padding:.35rem .65rem;font-weight:600;letter-spacing:.05em;border:1px solid var(--ln);transition:all .2s;text-transform:uppercase}
+.lng-sw button:first-child{border-radius:0}
+.lng-sw button:last-child{border-left:none;border-radius:0}
+.lng-sw button.on{background:var(--ink);color:var(--w);border-color:var(--ink)}
+.btn-adm{font-size:.78rem;font-weight:600;padding:.5rem 1.1rem;border:1.5px solid var(--ink);letter-spacing:.04em;transition:all .2s}
+.btn-adm:hover{background:var(--ink);color:var(--w)}
+.btn-cta{font-size:.82rem;font-weight:600;padding:.65rem 1.6rem;background:var(--gr);color:var(--w);letter-spacing:.03em;transition:background .2s}
+.btn-cta:hover{background:var(--gr2)}
+.mob-tog{display:none;flex-direction:column;gap:5px;cursor:pointer;padding:6px}
+.mob-tog span{width:22px;height:2px;background:var(--ink);transition:all .3s}
+
+/* ─── HERO ─── */
+.hero{min-height:100vh;display:grid;grid-template-columns:1fr 1fr;position:relative;overflow:hidden}
+#topoCanvas{position:absolute;inset:0;width:100%;height:100%;z-index:0;pointer-events:none}
+.hero-l{position:relative;z-index:2;display:flex;flex-direction:column;justify-content:center;padding:8rem 4rem 5rem 5rem}
+.ey{display:flex;align-items:center;gap:.8rem;margin-bottom:1.8rem;font-size:.78rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--gr)}
+.ey::before{content:'';width:2rem;height:2px;background:var(--gr)}
+.pulse-dot{width:7px;height:7px;border-radius:50%;background:var(--gr);animation:pulse 2s ease infinite;margin-right:.3rem}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(1.5)}}
+.hero h1{font-size:clamp(2.6rem,4.5vw,4rem);margin-bottom:2rem;color:var(--ink)}
+.hero-bl{list-style:none;margin-bottom:2.5rem;display:flex;flex-direction:column;gap:.7rem}
+.hero-bl li{padding-left:1.4rem;position:relative;font-size:.95rem;color:var(--ink);line-height:1.5}
+.hero-bl li::before{content:'';position:absolute;left:0;top:.55em;width:7px;height:7px;border-radius:50%;background:var(--gr)}
+.hero-btns{display:flex;align-items:center;gap:1.5rem;margin-bottom:3.5rem}
+.btn-f{padding:.85rem 2rem;background:var(--gr);color:var(--w);font-weight:600;font-size:.9rem;transition:background .2s}
+.btn-f:hover{background:var(--gr2)}
+.btn-t{font-size:.9rem;font-weight:500;color:var(--ink);border-bottom:1.5px solid var(--ink);padding-bottom:2px;transition:color .2s}
+.btn-t:hover{color:var(--gr)}
+.hero-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:2rem;border-top:2px solid var(--ink);padding-top:2rem}
+.hs-n{font-family:'DM Serif Display',serif;font-size:3.8rem;font-style:italic;line-height:1;color:var(--ink)}
+.hs-l{font-size:.78rem;color:var(--mu);margin-top:.3rem;white-space:pre-line}
+.hero-r{position:relative;z-index:2;overflow:hidden}
+.hero-r img{width:100%;height:100%;object-fit:cover}
+.hero-r::after{content:'';position:absolute;bottom:0;left:0;right:0;height:45%;background:linear-gradient(to top,rgba(15,14,11,.55),transparent);pointer-events:none}
+.hero-card{position:absolute;bottom:2.5rem;left:2rem;z-index:3;background:rgba(255,255,255,.18);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);padding:1.3rem 1.8rem;border:1px solid rgba(255,255,255,.2)}
+.hero-card h3{font-family:'DM Serif Display',serif;font-style:italic;font-size:1.6rem;color:var(--gr)}
+.hero-card p{font-size:.78rem;color:var(--w);margin-top:.25rem}
+.hero-vert{position:absolute;right:1.2rem;top:50%;transform:translateY(-50%) rotate(90deg);z-index:3;font-size:.68rem;letter-spacing:.15em;text-transform:uppercase;color:rgba(255,255,255,.6);white-space:nowrap}
+
+/* ─── TICKER ─── */
+.ticker{background:var(--gr);padding:.85rem 0;overflow:hidden;white-space:nowrap}
+.ticker-inner{display:inline-flex;animation:tickScroll 25s linear infinite}
+.ticker-inner span{font-size:.82rem;font-weight:600;color:var(--w);letter-spacing:.08em;text-transform:uppercase;padding:0 2rem}
+@keyframes tickScroll{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+
+/* ─── SECTIONS ─── */
+.sc-pad{padding:8rem 5rem}
+.bg-w{background:var(--w)}
+.bg-p{background:var(--p)}
+.bg-dk{background:var(--dk);color:var(--p)}
+.eyb{display:flex;align-items:center;gap:.8rem;font-size:.75rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--gr);margin-bottom:1rem}
+.eyb::before{content:'';width:2rem;height:2px;background:var(--gr)}
+.sec-h2{font-size:clamp(2rem,3.5vw,3rem);margin-bottom:1.5rem}
+.sec-desc{color:var(--mu);font-size:.95rem;max-width:520px;margin-bottom:2.5rem;line-height:1.7}
+.green-line{width:0;height:2px;background:var(--gr);transition:width 1.2s ease;margin-bottom:3rem}
+.green-line.vis{width:100%}
+
+/* ─── SPRÁVA ─── */
+.sprava-grid{display:grid;grid-template-columns:1.1fr .9fr;gap:4rem}
+.srv-list{display:flex;flex-direction:column}
+.srv-item{display:grid;grid-template-columns:3.5rem 1fr;gap:.5rem;padding:1.2rem 0;border-bottom:1px solid var(--ln);transition:background .2s,padding .2s;cursor:default}
+.srv-item:hover{background:rgba(90,120,85,.08);padding-left:1rem;padding-right:1rem}
+.srv-num{font-family:'DM Serif Display',serif;font-size:1.1rem;color:var(--mu)}
+.srv-name{font-weight:600;font-size:.95rem;margin-bottom:.15rem}
+.srv-desc{font-size:.82rem;color:var(--mu)}
+.why-box{background:var(--gr);color:var(--w);padding:2.2rem;margin-bottom:2rem}
+.why-box h3{font-family:'DM Serif Display',serif;font-size:1.5rem;margin-bottom:1.2rem}
+.why-list{list-style:none;display:flex;flex-direction:column;gap:.65rem}
+.why-list li{font-size:.88rem;display:flex;align-items:flex-start;gap:.6rem}
+.why-list li::before{content:'✓';font-weight:700;color:var(--w);flex-shrink:0;margin-top:1px}
+.sprava-img{position:relative;overflow:hidden}
+.sprava-img img{width:100%;height:320px;object-fit:cover}
+.sprava-img .cap{position:absolute;bottom:0;left:0;right:0;background:rgba(15,14,11,.7);color:var(--w);font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;padding:.6rem 1rem;backdrop-filter:blur(6px)}
+.yield-bar{background:var(--gr);padding:2rem 2.2rem;display:flex;align-items:center;gap:2rem;margin-top:2rem}
+.yield-bar .yb-n{font-family:'DM Serif Display',serif;font-size:3rem;font-style:italic;color:var(--w)}
+.yield-bar .yb-t{font-size:.85rem;color:rgba(255,255,255,.85);line-height:1.5}
+
+/* ─── NABÍDKA ─── */
+.nab-sec{position:relative}
+.nab-sec::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,var(--p),var(--p2),var(--p));background-size:200% 200%;animation:ambientShift 18s ease infinite;z-index:0}
+@keyframes ambientShift{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
+.nab-inner{position:relative;z-index:1}
+.filters{display:flex;gap:1rem;margin-bottom:3rem;flex-wrap:wrap}
+.fbtn{padding:.55rem 1.3rem;font-size:.8rem;font-weight:600;border:1.5px solid var(--ln);transition:all .2s;letter-spacing:.03em}
+.fbtn.on{background:var(--ink);color:var(--w);border-color:var(--ink)}
+.fbtn:hover:not(.on){border-color:var(--ink)}
+.props-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2rem}
+.prop-card{background:var(--w);overflow:hidden;transition:transform .3s,box-shadow .3s;position:relative}
+.prop-card:hover{transform:translateY(-4px);box-shadow:0 12px 40px rgba(0,0,0,.1)}
+.pc-gallery{position:relative;height:230px;overflow:hidden;cursor:pointer}
+.pc-gallery img{width:100%;height:100%;object-fit:cover;transition:transform .6s}
+.prop-card:hover .pc-gallery img{transform:scale(1.05)}
+.pc-gallery::after{content:'';position:absolute;bottom:0;left:0;right:0;height:50%;background:linear-gradient(to top,rgba(15,14,11,.4),transparent);pointer-events:none}
+.pc-gallery .shimmer{position:absolute;inset:0;background:linear-gradient(105deg,transparent 40%,rgba(255,255,255,.25) 50%,transparent 60%);transform:translateX(-100%);pointer-events:none}
+.prop-card:hover .shimmer{animation:shimmer .8s ease forwards}
+@keyframes shimmer{to{transform:translateX(100%)}}
+.pc-nav{position:absolute;top:50%;transform:translateY(-50%);width:32px;height:32px;background:rgba(255,255,255,.85);display:flex;align-items:center;justify-content:center;font-size:.9rem;z-index:2;opacity:0;transition:opacity .3s}
+.prop-card:hover .pc-nav{opacity:1}
+.pc-nav.pv{left:8px}
+.pc-nav.nx{right:8px}
+.pc-dots{position:absolute;bottom:10px;left:50%;transform:translateX(-50%);display:flex;gap:5px;z-index:2}
+.pc-dots span{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.4);transition:background .2s}
+.pc-dots span.on{background:var(--w)}
+.badge{position:absolute;bottom:12px;left:12px;z-index:2;font-size:.68rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;padding:.35rem .8rem;color:var(--w)}
+.badge-pronajem{background:var(--gld)}
+.badge-prodej{background:var(--dk)}
+.badge-investice{background:var(--gr)}
+.status-badge{position:absolute;top:12px;right:12px;z-index:2;font-size:.65rem;font-weight:600;padding:.3rem .7rem;background:rgba(255,255,255,.9);color:var(--gr);letter-spacing:.05em;text-transform:uppercase}
+.pc-body{padding:1.5rem}
+.pc-cat{font-size:.7rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--gr);margin-bottom:.3rem}
+.pc-name{font-family:'DM Serif Display',serif;font-size:1.2rem;margin-bottom:.3rem}
+.pc-loc{font-size:.78rem;color:var(--mu);margin-bottom:.5rem}
+.pc-desc{font-size:.82rem;color:var(--mu);line-height:1.5;margin-bottom:1rem}
+.pc-foot{display:flex;justify-content:space-between;align-items:center;border-top:1px solid var(--ln);padding-top:1rem}
+.pc-price{font-family:'DM Serif Display',serif;font-style:italic;font-size:1.3rem}
+.pc-cta{padding:.5rem 1.2rem;background:var(--gr);color:var(--w);font-size:.78rem;font-weight:600;transition:background .2s}
+.pc-cta:hover{background:var(--gr2)}
+
+/* ─── FOTO STRIP ─── */
+.foto-strip{display:grid;grid-template-columns:1fr 1fr 1fr;height:280px}
+.foto-strip div{overflow:hidden;position:relative}
+.foto-strip img{width:100%;height:100%;object-fit:cover;transition:transform .6s}
+.foto-strip div:hover img{transform:scale(1.08)}
+
+/* ─── PORTFOLIO ─── */
+.port-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2rem}
+.port-card{border:1px solid rgba(255,255,255,.08);overflow:hidden;transition:border-color .3s,box-shadow .3s}
+.port-card:hover{border-color:var(--gr);box-shadow:0 0 30px rgba(90,120,85,.2)}
+.port-img{height:160px;overflow:hidden}
+.port-img img{width:100%;height:100%;object-fit:cover;transition:transform .6s}
+.port-card:hover .port-img img{transform:scale(1.06)}
+.port-body{padding:1.5rem}
+.port-num{font-family:'DM Serif Display',serif;font-size:2rem;font-style:italic;color:var(--gr);margin-bottom:.3rem}
+.port-cat{font-size:.7rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--gr2);margin-bottom:.4rem}
+.port-name{font-family:'DM Serif Display',serif;font-size:1.15rem;color:var(--p);margin-bottom:.3rem}
+.port-loc{font-size:.78rem;color:var(--mu);margin-bottom:.8rem}
+.port-tags{display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:1rem}
+.port-tags span{font-size:.68rem;padding:.25rem .65rem;border:1px solid rgba(255,255,255,.12);color:var(--mu);letter-spacing:.04em}
+.port-stats{display:flex;gap:1.5rem;border-top:1px solid rgba(255,255,255,.08);padding-top:.8rem}
+.port-stats div{font-size:.72rem;color:var(--mu)}
+.port-stats strong{color:var(--p);font-weight:600;display:block;font-size:.85rem}
+
+/* ─── AI ─── */
+.ai-wrap{max-width:700px;margin:0 auto;text-align:center}
+.ai-upload{border:2px dashed var(--ln);padding:3rem;margin:2rem 0;transition:border-color .2s;cursor:pointer;position:relative}
+.ai-upload:hover{border-color:var(--gr)}
+.ai-upload input{position:absolute;inset:0;opacity:0;cursor:pointer}
+.ai-upload p{color:var(--mu);font-size:.9rem}
+.ai-upload .icon{font-size:2.5rem;margin-bottom:.8rem;color:var(--gr)}
+.ai-preview{max-width:100%;max-height:300px;margin:1rem auto;display:none;border:1px solid var(--ln)}
+.ai-btn{padding:.85rem 2.5rem;background:var(--gr);color:var(--w);font-size:.9rem;font-weight:600;transition:background .2s;margin-top:1rem}
+.ai-btn:hover{background:var(--gr2)}
+.ai-btn:disabled{opacity:.5;cursor:not-allowed}
+.ai-result{margin-top:2rem;padding:2rem;background:var(--w);border:1px solid var(--ln);text-align:left;font-size:.9rem;line-height:1.7;white-space:pre-wrap;display:none}
+.ai-loading{display:none;margin:1.5rem 0;color:var(--mu)}
+.ai-key-input{display:block;width:100%;max-width:450px;margin:0 auto 1rem;padding:.7rem 1rem;border:1.5px solid var(--ln);font-family:inherit;font-size:.85rem;outline:none;transition:border-color .2s}
+.ai-key-input:focus{border-color:var(--gr)}
+
+/* ─── KONTAKT ─── */
+.kon-grid{display:grid;grid-template-columns:1fr 1fr;gap:4rem}
+.kon-info h3{font-family:'DM Serif Display',serif;font-size:1.8rem;margin-bottom:1.5rem}
+.kon-detail{margin-bottom:2rem}
+.kon-detail p{font-size:.9rem;color:var(--mu);line-height:1.8}
+.kon-detail strong{color:var(--ink);font-weight:600}
+.kon-social{display:flex;gap:1rem;margin-top:1.5rem}
+.kon-social a{width:38px;height:38px;border:1.5px solid var(--ln);display:flex;align-items:center;justify-content:center;font-size:.85rem;transition:all .2s}
+.kon-social a:hover{background:var(--gr);color:var(--w);border-color:var(--gr)}
+.kon-form label{display:block;font-size:.78rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--mu);margin-bottom:.4rem}
+.kon-form input,.kon-form textarea{width:100%;padding:.8rem 1rem;border:1.5px solid var(--ln);font-family:inherit;font-size:.9rem;outline:none;transition:border-color .2s;margin-bottom:1.2rem;background:var(--w)}
+.kon-form input:focus,.kon-form textarea:focus{border-color:var(--gr)}
+.kon-form textarea{height:130px;resize:vertical}
+.kon-submit{width:100%;padding:.85rem;background:var(--gr);color:var(--w);font-size:.9rem;font-weight:600;transition:background .2s}
+.kon-submit:hover{background:var(--gr2)}
+
+/* ─── FOOTER ─── */
+.foot{background:var(--dk);color:var(--p);padding:4rem 5rem 2rem}
+.foot-top{display:grid;grid-template-columns:1.5fr 1fr 1fr 1fr;gap:3rem;margin-bottom:3rem}
+.foot h4{font-family:'DM Serif Display',serif;font-size:1rem;margin-bottom:1rem;color:var(--p)}
+.foot p,.foot a{font-size:.82rem;color:var(--mu);line-height:1.8}
+.foot a:hover{color:var(--gr)}
+.foot-desc{font-size:.85rem;color:var(--mu);line-height:1.7;max-width:300px;margin-top:.8rem}
+.foot-bot{border-top:1px solid rgba(255,255,255,.08);padding-top:1.5rem;display:flex;justify-content:space-between;font-size:.75rem;color:var(--mu)}
+
+/* ─── ADMIN MODAL ─── */
+.adm-overlay{position:fixed;inset:0;background:rgba(15,14,11,.85);z-index:200;display:none;align-items:center;justify-content:center;backdrop-filter:blur(4px)}
+.adm-overlay.open{display:flex}
+.adm-modal{background:var(--w);width:90%;max-width:960px;max-height:90vh;overflow-y:auto;position:relative}
+.adm-close{position:absolute;top:1rem;right:1.2rem;font-size:1.5rem;cursor:pointer;color:var(--mu);transition:color .2s;background:none;border:none}
+.adm-close:hover{color:var(--ink)}
+.adm-head{padding:2rem 2.5rem 0;border-bottom:1px solid var(--ln)}
+.adm-head h2{font-family:'DM Serif Display',serif;font-size:1.8rem;margin-bottom:1rem}
+.adm-tabs{display:flex;gap:0}
+.adm-tabs button{padding:.7rem 1.5rem;font-size:.82rem;font-weight:600;border-bottom:2px solid transparent;transition:all .2s;color:var(--mu)}
+.adm-tabs button.on{color:var(--ink);border-bottom-color:var(--gr)}
+.adm-body{padding:2rem 2.5rem}
+.adm-body h3{font-family:'DM Serif Display',serif;font-size:1.2rem;margin-bottom:1rem}
+.adm-stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem;margin-bottom:2rem}
+.adm-stat{background:var(--p);padding:1.5rem;text-align:center}
+.adm-stat .n{font-family:'DM Serif Display',serif;font-size:2.2rem;font-style:italic;color:var(--gr)}
+.adm-stat .l{font-size:.78rem;color:var(--mu);margin-top:.3rem}
+.adm-table{width:100%;border-collapse:collapse;font-size:.85rem;margin-bottom:1.5rem}
+.adm-table th{text-align:left;padding:.7rem .5rem;border-bottom:2px solid var(--ln);font-size:.75rem;text-transform:uppercase;letter-spacing:.06em;color:var(--mu)}
+.adm-table td{padding:.7rem .5rem;border-bottom:1px solid var(--ln)}
+.adm-table button{font-size:.75rem;padding:.3rem .7rem;margin-right:.3rem;border:1px solid var(--ln);transition:all .2s}
+.adm-table button:hover{background:var(--ink);color:var(--w);border-color:var(--ink)}
+.adm-table .del:hover{background:var(--ter);border-color:var(--ter)}
+.adm-form label{display:block;font-size:.78rem;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--mu);margin-bottom:.3rem;margin-top:.8rem}
+.adm-form input,.adm-form select,.adm-form textarea{width:100%;padding:.6rem .8rem;border:1.5px solid var(--ln);font-family:inherit;font-size:.85rem;outline:none;margin-bottom:.2rem}
+.adm-form input:focus,.adm-form select:focus,.adm-form textarea:focus{border-color:var(--gr)}
+.adm-form textarea{height:80px;resize:vertical}
+.adm-form-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+.adm-save{padding:.65rem 1.5rem;background:var(--gr);color:var(--w);font-weight:600;font-size:.85rem;margin-top:1rem;transition:background .2s}
+.adm-save:hover{background:var(--gr2)}
+.adm-cancel{padding:.65rem 1.5rem;border:1.5px solid var(--ln);font-weight:600;font-size:.85rem;margin-top:1rem;margin-left:.5rem;transition:all .2s}
+.adm-cancel:hover{border-color:var(--ink)}
+.adm-pane{display:none}
+.adm-pane.vis{display:block}
+
+/* ─── SCROLL REVEAL ─── */
+.fu{opacity:0;transform:translateY(28px);transition:opacity .7s ease,transform .7s ease}
+.fu.vis{opacity:1;transform:translateY(0)}
+
+/* ─── RESPONSIVE ─── */
+@media(max-width:768px){
+  .nv{padding:.8rem 1.2rem}
+  .nv-links,.lng-sw,.btn-adm{display:none}
+  .nv.mob-open .nv-links{display:flex;flex-direction:column;position:absolute;top:100%;left:0;right:0;background:var(--w);padding:1.5rem;border-bottom:1px solid var(--ln);box-shadow:0 8px 30px rgba(0,0,0,.1)}
+  .nv.mob-open .lng-sw,.nv.mob-open .btn-adm{display:flex}
+  .mob-tog{display:flex}
+  .hero{grid-template-columns:1fr}
+  .hero-r{display:none}
+  .hero-l{padding:7rem 1.5rem 4rem}
+  .hero h1{font-size:2.2rem}
+  .hero-stats{grid-template-columns:repeat(3,1fr);gap:1rem}
+  .hs-n{font-size:2.2rem}
+  .sc-pad{padding:4rem 1.5rem}
+  .sprava-grid{grid-template-columns:1fr}
+  .props-grid{grid-template-columns:1fr}
+  .foto-strip{grid-template-columns:1fr;height:auto}
+  .foto-strip div{height:200px}
+  .port-grid{grid-template-columns:1fr}
+  .kon-grid{grid-template-columns:1fr}
+  .foot-top{grid-template-columns:1fr 1fr;gap:2rem}
+  .foot{padding:3rem 1.5rem 1.5rem}
+}
+</style>
+</head>
+<body>
+
+<!-- ─── NAV ─── -->
+<nav class="nv" id="nav">
+  <a href="#" class="nl">Nova<em>Dom</em></a>
+  <div class="mob-tog" onclick="document.getElementById('nav').classList.toggle('mob-open')">
+    <span></span><span></span><span></span>
+  </div>
+  <div class="nv-links">
+    <a href="#sprava" data-t="nav_services">Správa</a>
+    <a href="#nabidka" data-t="nav_listings">Nabídka</a>
+    <a href="#portfolio" data-t="nav_portfolio">Portfolio</a>
+    <a href="#ai" data-t="nav_ai">AI návrh</a>
+    <a href="#kontakt" data-t="nav_contact">Kontakt</a>
+    <div class="lng-sw">
+      <button class="on" onclick="S.setLang('cs')">CZ</button>
+      <button onclick="S.setLang('en')">EN</button>
+    </div>
+    <button class="btn-adm" onclick="S.openAdmin()" data-t="nav_admin">Admin</button>
+    <button class="btn-cta" onclick="document.getElementById('kontakt').scrollIntoView()" data-t="nav_cta">Konzultace</button>
+  </div>
+</nav>
+
+<!-- ─── HERO ─── -->
+<section class="hero" id="hero">
+  <canvas id="topoCanvas"></canvas>
+  <div class="hero-l">
+    <div class="ey"><span class="pulse-dot"></span><span data-t="hero_eyebrow">Správa domů &amp; zahrad · Celá ČR</span></div>
+    <h1 data-t="hero_h1">Péče o domy<br><em>a zahrady</em></h1>
+    <ul class="hero-bl">
+      <li data-t="hero_b1">Kompletní správa domu — nájemníci, inkaso, technika.</li>
+      <li data-t="hero_b2">Péče o zahradu po celý rok — sekání, výsadba, návrhy.</li>
+      <li data-t="hero_b3">Investiční výnos 5–6,1 % zajištěný vlastnickým právem.</li>
+    </ul>
+    <div class="hero-btns">
+      <button class="btn-f" onclick="document.getElementById('kontakt').scrollIntoView()" data-t="hero_btn1">Domluvit konzultaci</button>
+      <a href="#sprava" class="btn-t" data-t="hero_btn2">Jak fungujeme →</a>
+    </div>
+    <div class="hero-stats">
+      <div><div class="hs-n" data-count="350" data-suffix="+">0</div><div class="hs-l" data-t="stat1">Spravovaných
+objektů</div></div>
+      <div><div class="hs-n" data-count="12" data-suffix="">0</div><div class="hs-l" data-t="stat2">Let
+zkušeností</div></div>
+      <div><div class="hs-n" data-count="6.1" data-suffix="%" data-dec="1">0</div><div class="hs-l" data-t="stat3">Roční výnos
+pro investory</div></div>
+    </div>
+  </div>
+  <div class="hero-r">
+    <img src="https://picsum.photos/seed/1029/1200/900" alt="NovaDom">
+    <div class="hero-card">
+      <h3>NovaDom</h3>
+      <p data-t="hero_card">Správa domů &amp; zahrad po celé ČR</p>
+    </div>
+    <div class="hero-vert">Praha · Brno · Ostrava · Celá ČR</div>
+  </div>
+</section>
+
+<!-- ─── TICKER ─── -->
+<div class="ticker">
+  <div class="ticker-inner" data-t-ticker="ticker">
+    <span>Správa domů</span><span>·</span><span>Správa zahrad</span><span>·</span><span>Pronájmy</span><span>·</span><span>Prodeje</span><span>·</span><span>Investice</span><span>·</span><span>Technická správa</span><span>·</span><span>SVJ</span><span>·</span><span>Revize</span>
+    <span>Správa domů</span><span>·</span><span>Správa zahrad</span><span>·</span><span>Pronájmy</span><span>·</span><span>Prodeje</span><span>·</span><span>Investice</span><span>·</span><span>Technická správa</span><span>·</span><span>SVJ</span><span>·</span><span>Revize</span>
+  </div>
+</div>
+
+<!-- ─── SPRÁVA ─── -->
+<section class="sc-pad bg-w" id="sprava">
+  <div class="mw">
+    <div class="green-line fu"></div>
+    <div class="sprava-grid">
+      <div>
+        <div class="eyb fu" data-t="srv_eyb">Co děláme</div>
+        <h2 class="sec-h2 fu" data-t="srv_h2">Správa domů <em>a zahrad</em></h2>
+        <p class="sec-desc fu" data-t="srv_desc">Staráme se o vaše nemovitosti a zahrady s maximální péčí. Od technické správy po kompletní údržbu zeleně — vše řešíme za vás.</p>
+        <div class="srv-list fu">
+          <div class="srv-item"><span class="srv-num">01</span><div><div class="srv-name" data-t="s1n">Správa domu</div><div class="srv-desc" data-t="s1d">Nájemníci, inkaso, technická správa</div></div></div>
+          <div class="srv-item"><span class="srv-num">02</span><div><div class="srv-name" data-t="s2n">Správa zahrady</div><div class="srv-desc" data-t="s2d">Sekání, výsadba, sezónní péče</div></div></div>
+          <div class="srv-item"><span class="srv-num">03</span><div><div class="srv-name" data-t="s3n">Pronájmy</div><div class="srv-desc" data-t="s3d">Vyhledání nájemníků, smlouvy, kontroly</div></div></div>
+          <div class="srv-item"><span class="srv-num">04</span><div><div class="srv-name" data-t="s4n">Prodeje</div><div class="srv-desc" data-t="s4d">Oceňování, marketing, právní servis</div></div></div>
+          <div class="srv-item"><span class="srv-num">05</span><div><div class="srv-name" data-t="s5n">Technická správa</div><div class="srv-desc" data-t="s5d">Revize, opravy, rekonstrukce</div></div></div>
+          <div class="srv-item"><span class="srv-num">06</span><div><div class="srv-name" data-t="s6n">Investice</div><div class="srv-desc" data-t="s6d">Výnos 5–6,1 %, vlastnické právo, měsíční výplata</div></div></div>
+        </div>
+      </div>
+      <div>
+        <div class="why-box fu">
+          <h3 data-t="why_h">Proč NovaDom?</h3>
+          <ul class="why-list">
+            <li data-t="w1">12 let zkušeností se správou nemovitostí</li>
+            <li data-t="w2">350+ spokojených klientů po celé ČR</li>
+            <li data-t="w3">Garantovaný výnos 5–6,1 % ročně</li>
+            <li data-t="w4">Kompletní servis od A do Z</li>
+          </ul>
+        </div>
+        <div class="sprava-img fu">
+          <img src="https://picsum.photos/seed/1080/800/600" alt="Zahrada">
+          <div class="cap" data-t="srv_cap">Správa zahrad · NovaDom</div>
+        </div>
+        <div class="yield-bar fu">
+          <div class="yb-n">6,1%</div>
+          <div class="yb-t" data-t="yield_t">Roční výnos zajištěný nemovitostí<br>Měsíční výplata od 9 000 Kč</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── NABÍDKA ─── -->
+<section class="sc-pad nab-sec" id="nabidka">
+  <div class="nab-inner mw">
+    <div class="eyb fu" data-t="nab_eyb">Nabídka</div>
+    <h2 class="sec-h2 fu" data-t="nab_h2">Nemovitosti <em>v nabídce</em></h2>
+    <div class="filters fu" id="filters"></div>
+    <div class="props-grid" id="propsGrid"></div>
+  </div>
+</section>
+
+<!-- ─── FOTO STRIP ─── -->
+<div class="foto-strip">
+  <div><img src="https://picsum.photos/seed/1080/700/500" alt="Zahrada"></div>
+  <div><img src="https://picsum.photos/seed/1029/700/500" alt="Dům"></div>
+  <div><img src="https://picsum.photos/seed/1031/700/500" alt="Interiér"></div>
+</div>
+
+<!-- ─── PORTFOLIO ─── -->
+<section class="sc-pad bg-dk" id="portfolio">
+  <div class="mw">
+    <div class="eyb fu" data-t="port_eyb">Portfolio</div>
+    <h2 class="sec-h2 fu" data-t="port_h2" style="color:var(--p)">Naše <em>realizace</em></h2>
+    <p class="sec-desc fu" data-t="port_desc" style="color:var(--mu)">Vybrané projekty, na které jsme hrdí. Každý z nich svědčí o kvalitě naší práce.</p>
+    <div class="port-grid" id="portGrid"></div>
+  </div>
+</section>
+
+<!-- ─── AI NÁVRH ─── -->
+<section class="sc-pad bg-p" id="ai">
+  <div class="mw">
+    <div class="ai-wrap">
+      <div class="eyb fu" style="justify-content:center" data-t="ai_eyb">AI návrh</div>
+      <h2 class="sec-h2 fu" data-t="ai_h2">Nechte AI <em>navrhnout</em></h2>
+      <p class="sec-desc fu" style="margin:0 auto 1.5rem;text-align:center" data-t="ai_desc">Nahrajte fotku svého domu nebo zahrady a naše AI vám navrhne úpravy a vylepšení.</p>
+      <input type="text" class="ai-key-input fu" id="aiKey" placeholder="Anthropic API klíč (sk-ant-...)" data-t-placeholder="ai_key_ph">
+      <div class="ai-upload fu" id="aiUpload">
+        <div class="icon">⬆</div>
+        <p data-t="ai_upload">Klikněte nebo přetáhněte fotku sem</p>
+        <input type="file" accept="image/*" id="aiFile">
+      </div>
+      <img class="ai-preview" id="aiPreview" alt="Preview">
+      <div class="ai-loading" id="aiLoading" data-t="ai_loading">⏳ Generuji návrh...</div>
+      <button class="ai-btn fu" id="aiBtn" onclick="S.generateAI()" disabled data-t="ai_btn">Generovat návrh</button>
+      <div class="ai-result" id="aiResult"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── KONTAKT ─── -->
+<section class="sc-pad bg-p" id="kontakt" style="background:var(--p2)">
+  <div class="mw">
+    <div class="eyb fu" data-t="kon_eyb">Kontakt</div>
+    <h2 class="sec-h2 fu" data-t="kon_h2">Spojte se <em>s námi</em></h2>
+    <div class="kon-grid">
+      <div class="kon-info fu">
+        <h3 data-t="kon_info_h">Máte zájem? Ozvěte se.</h3>
+        <div class="kon-detail">
+          <p><strong data-t="kon_addr_l">Adresa:</strong> <span data-t="kon_addr">Staroměstské nám. 1, 110 00 Praha 1</span></p>
+          <p><strong data-t="kon_tel_l">Telefon:</strong> +420 777 123 456</p>
+          <p><strong>Email:</strong> info@novadom.cz</p>
+          <p><strong data-t="kon_hours_l">Pracovní hodiny:</strong> <span data-t="kon_hours">Po–Pá 8:00–17:00</span></p>
+        </div>
+        <div class="kon-social">
+          <a href="#" title="Facebook">f</a>
+          <a href="#" title="Instagram">in</a>
+          <a href="#" title="LinkedIn">Li</a>
+        </div>
+      </div>
+      <form class="kon-form fu" onsubmit="event.preventDefault();alert(S.lang==='cs'?'Zpráva odeslána! Ozveme se vám.':'Message sent! We will contact you.')">
+        <label data-t="f_name_l">Jméno</label>
+        <input type="text" required data-t-placeholder="f_name_ph" placeholder="Vaše jméno">
+        <label>Email</label>
+        <input type="email" required placeholder="vas@email.cz">
+        <label data-t="f_tel_l">Telefon</label>
+        <input type="tel" placeholder="+420 ...">
+        <label data-t="f_msg_l">Zpráva</label>
+        <textarea required data-t-placeholder="f_msg_ph" placeholder="Jak vám můžeme pomoci?"></textarea>
+        <button type="submit" class="kon-submit" data-t="f_submit">Odeslat zprávu</button>
+      </form>
+    </div>
+  </div>
+</section>
+
+<!-- ─── FOOTER ─── -->
+<footer class="foot">
+  <div class="mw">
+    <div class="foot-top">
+      <div>
+        <a class="nl" style="font-size:1.6rem">Nova<em>Dom</em></a>
+        <p class="foot-desc" data-t="foot_desc">Profesionální správa domů, zahrad a nemovitostí po celé České republice. Váš partner pro bydlení i investice.</p>
+      </div>
+      <div>
+        <h4 data-t="foot_nav">Navigace</h4>
+        <a href="#sprava" data-t="nav_services">Správa</a><br>
+        <a href="#nabidka" data-t="nav_listings">Nabídka</a><br>
+        <a href="#portfolio" data-t="nav_portfolio">Portfolio</a><br>
+        <a href="#kontakt" data-t="nav_contact">Kontakt</a>
+      </div>
+      <div>
+        <h4 data-t="foot_services">Služby</h4>
+        <a href="#" data-t="s1n">Správa domu</a><br>
+        <a href="#" data-t="s2n">Správa zahrady</a><br>
+        <a href="#" data-t="s3n">Pronájmy</a><br>
+        <a href="#" data-t="s6n">Investice</a>
+      </div>
+      <div>
+        <h4 data-t="foot_legal">Právní</h4>
+        <a href="#" data-t="foot_privacy">Ochrana osobních údajů</a><br>
+        <a href="#" data-t="foot_terms">Obchodní podmínky</a><br>
+        <a href="#" data-t="foot_cookies">Cookies</a>
+      </div>
+    </div>
+    <div class="foot-bot">
+      <span>© 2024 NovaDom. <span data-t="foot_rights">Všechna práva vyhrazena.</span></span>
+      <span data-t="foot_made">Vytvořeno s péčí v Praze</span>
+    </div>
+  </div>
+</footer>
+
+<!-- ─── ADMIN OVERLAY ─── -->
+<div class="adm-overlay" id="adminOverlay">
+  <div class="adm-modal">
+    <button class="adm-close" onclick="S.closeAdmin()">×</button>
+    <div class="adm-head">
+      <h2>Admin Panel</h2>
+      <div class="adm-tabs" id="admTabs">
+        <button class="on" onclick="S.admTab(0)">Dashboard</button>
+        <button onclick="S.admTab(1)" data-t="adm_props">Nemovitosti</button>
+        <button onclick="S.admTab(2)">Portfolio</button>
+        <button onclick="S.admTab(3)" data-t="adm_settings">Nastavení</button>
+      </div>
+    </div>
+    <div class="adm-body" id="admBody"></div>
+  </div>
+</div>
+
+<script>
+const S = {
+  lang: 'cs',
+  props: [],
+  portfolio: [],
+  contact: {},
+  siteTitle: 'NovaDom — Správa domů & zahrad',
+
+  defaultProps: [
+    {id:'p1',name:'Byt 2+kk Praha 2',city:'Praha',type:'pronajem',cat:'Byt',price:'18500',area:'52',rooms:'2+kk',status:'available',desc:'Světlý byt v centru Prahy, plně zařízený, MHD 2 min.',photos:['https://picsum.photos/seed/1031/800/600','https://picsum.photos/seed/584/800/600']},
+    {id:'p2',name:'Vila se zahradou Brno',city:'Brno',type:'prodej',cat:'Rodinný dům',price:'9800000',area:'240',rooms:'5+kk',status:'available',desc:'Luxusní vila s upravenou zahradou 800 m², po kompletní rekonstrukci.',photos:['https://picsum.photos/seed/1029/800/600','https://picsum.photos/seed/164/800/600','https://picsum.photos/seed/1080/800/600']},
+    {id:'p3',name:'Investiční byt Praha 4',city:'Praha',type:'investice',cat:'Byt',price:'3500000',area:'68',rooms:'2+1',status:'available',desc:'Výnos 5,8 % ročně, zajištěno vlastnickým právem, měsíční výplata.',photos:['https://picsum.photos/seed/1060/800/600','https://picsum.photos/seed/1039/800/600']}
+  ],
+
+  defaultPortfolio: [
+    {id:'pf1',num:'01',cat:'Správa domu',name:'Vila Roztoky u Prahy',loc:'Praha-západ',photo:'https://picsum.photos/seed/164/600/400',tags:['Rekonstrukce','Správa','Zahrada'],stats:{area:'320 m²',year:'2022'}},
+    {id:'pf2',num:'02',cat:'Správa zahrady',name:'Zahrada Průhonice',loc:'Praha-východ',photo:'https://picsum.photos/seed/1080/600/400',tags:['Návrh','Výsadba','Údržba'],stats:{area:'1 200 m²',year:'2023'}},
+    {id:'pf3',num:'03',cat:'Technická správa',name:'Bytový dům Brno-střed',loc:'Brno',photo:'https://picsum.photos/seed/534/600/400',tags:['SVJ','Revize','Opravy'],stats:{area:'890 m²',year:'2024'}}
+  ],
+
+  defaultContact: {
+    address:'Staroměstské nám. 1, 110 00 Praha 1',
+    phone:'+420 777 123 456',
+    email:'info@novadom.cz',
+    hours:'Po–Pá 8:00–17:00'
+  },
+
+  activeFilter: {type:'all',city:'all'},
+  galleryIdx: {},
+
+  init() {
+    const saved = localStorage.getItem('nd_state');
+    if (saved) {
+      try {
+        const d = JSON.parse(saved);
+        this.props = d.props || this.defaultProps;
+        this.portfolio = d.portfolio || this.defaultPortfolio;
+        this.contact = d.contact || this.defaultContact;
+        this.siteTitle = d.siteTitle || this.siteTitle;
+        this.lang = d.lang || 'cs';
+      } catch(e) {
+        this.resetDefaults();
+      }
+    } else {
+      this.resetDefaults();
+    }
+    this.applyLang(this.lang);
+    this.renderProps();
+    this.renderPortfolio();
+    this.renderFilters();
+    this.initCanvas();
+    this.initObservers();
+    this.initNav();
+    this.initAI();
+    document.title = this.siteTitle;
+  },
+
+  resetDefaults() {
+    this.props = JSON.parse(JSON.stringify(this.defaultProps));
+    this.portfolio = JSON.parse(JSON.stringify(this.defaultPortfolio));
+    this.contact = {...this.defaultContact};
+  },
+
+  save() {
+    localStorage.setItem('nd_state', JSON.stringify({
+      props: this.props,
+      portfolio: this.portfolio,
+      contact: this.contact,
+      siteTitle: this.siteTitle,
+      lang: this.lang
+    }));
+  },
+
+  /* ─── LANG ─── */
+  setLang(l) {
+    this.lang = l;
+    this.applyLang(l);
+    this.save();
+    this.renderFilters();
+    this.renderProps();
+    this.renderPortfolio();
+  },
+
+  applyLang(l) {
+    document.querySelectorAll('.lng-sw button').forEach(b => b.classList.toggle('on', b.textContent.trim() === (l==='cs'?'CZ':'EN')));
+    document.documentElement.lang = l;
+    document.querySelectorAll('[data-t]').forEach(el => {
+      const k = el.getAttribute('data-t');
+      if (TR[l] && TR[l][k]) {
+        el.innerHTML = TR[l][k];
+      }
+    });
+    document.querySelectorAll('[data-t-placeholder]').forEach(el => {
+      const k = el.getAttribute('data-t-placeholder');
+      if (TR[l] && TR[l][k]) el.placeholder = TR[l][k];
+    });
+  },
+
+  /* ─── FILTERS ─── */
+  renderFilters() {
+    const l = this.lang;
+    const t = TR[l];
+    const fc = document.getElementById('filters');
+    const types = [
+      {v:'all', l: t.f_all||'Vše'},
+      {v:'pronajem', l: t.f_rent||'Pronájem'},
+      {v:'prodej', l: t.f_sale||'Prodej'},
+      {v:'investice', l: t.f_inv||'Investice'}
+    ];
+    const cities = [
+      {v:'all', l: t.f_all_city||'Všechna města'},
+      {v:'Praha', l:'Praha'},
+      {v:'Brno', l:'Brno'}
+    ];
+    let h = '';
+    types.forEach(t => {
+      h += `<button class="fbtn${this.activeFilter.type===t.v?' on':''}" onclick="S.setFilter('type','${t.v}')">${t.l}</button>`;
+    });
+    h += '<span style="width:1px;height:24px;background:var(--ln);margin:0 .5rem"></span>';
+    cities.forEach(c => {
+      h += `<button class="fbtn${this.activeFilter.city===c.v?' on':''}" onclick="S.setFilter('city','${c.v}')">${c.l}</button>`;
+    });
+    fc.innerHTML = h;
+  },
+
+  setFilter(k, v) {
+    this.activeFilter[k] = v;
+    this.renderFilters();
+    this.renderProps();
+  },
+
+  /* ─── PROPS ─── */
+  fmtPrice(p) {
+    return parseInt(p).toLocaleString('cs-CZ').replace(/\s/g, ' ');
+  },
+
+  renderProps() {
+    const grid = document.getElementById('propsGrid');
+    const l = this.lang;
+    const t = TR[l];
+    let filtered = this.props.filter(p => {
+      if (this.activeFilter.type !== 'all' && p.type !== this.activeFilter.type) return false;
+      if (this.activeFilter.city !== 'all' && p.city !== this.activeFilter.city) return false;
+      return true;
+    });
+
+    if (!filtered.length) {
+      grid.innerHTML = `<p style="grid-column:1/-1;text-align:center;color:var(--mu);padding:3rem">${t.no_props||'Žádné nemovitosti v této kategorii.'}</p>`;
+      return;
+    }
+
+    const typeLabels = {pronajem: t.f_rent||'Pronájem', prodej: t.f_sale||'Prodej', investice: t.f_inv||'Investice'};
+    const statusLabels = {available: t.st_avail||'Dostupné', reserved: t.st_res||'Rezervováno', sold: t.st_sold||'Prodáno'};
+    const priceUnits = {pronajem: ' Kč/'+(l==='cs'?'měs.':'mo.'), prodej: ' Kč', investice: ' Kč'};
+
+    grid.innerHTML = filtered.map((p, i) => {
+      this.galleryIdx[p.id] = this.galleryIdx[p.id] || 0;
+      const gi = this.galleryIdx[p.id];
+      const dots = p.photos.map((_, di) => `<span class="${di===gi?'on':''}"></span>`).join('');
+      return `<div class="prop-card fu">
+        <div class="pc-gallery">
+          <img src="${p.photos[gi]}" alt="${p.name}">
+          <div class="shimmer"></div>
+          ${p.photos.length>1?`<button class="pc-nav pv" onclick="S.galNav('${p.id}',-1)">‹</button><button class="pc-nav nx" onclick="S.galNav('${p.id}',1)">›</button>`:''}
+          <div class="pc-dots">${dots}</div>
+          <span class="badge badge-${p.type}">${typeLabels[p.type]||p.type}</span>
+          <span class="status-badge">${statusLabels[p.status]||p.status}</span>
+          <div style="position:absolute;bottom:0;left:0;right:0;height:50%;background:linear-gradient(to top,rgba(15,14,11,.4),transparent);pointer-events:none"></div>
+        </div>
+        <div class="pc-body">
+          <div class="pc-cat">${p.cat}</div>
+          <div class="pc-name">${p.name}</div>
+          <div class="pc-loc">${p.city} · ${p.area} m² · ${p.rooms}</div>
+          <div class="pc-desc">${p.desc}</div>
+          <div class="pc-foot">
+            <span class="pc-price">${this.fmtPrice(p.price)}${priceUnits[p.type]||' Kč'}</span>
+            <button class="pc-cta" onclick="document.getElementById('kontakt').scrollIntoView()">${t.nav_contact||'Kontakt'}</button>
+          </div>
+        </div>
+      </div>`;
+    }).join('');
+
+    this.refreshObservers();
+  },
+
+  galNav(id, dir) {
+    const p = this.props.find(x => x.id === id);
+    if (!p) return;
+    let idx = (this.galleryIdx[id] || 0) + dir;
+    if (idx < 0) idx = p.photos.length - 1;
+    if (idx >= p.photos.length) idx = 0;
+    this.galleryIdx[id] = idx;
+    this.renderProps();
+  },
+
+  /* ─── PORTFOLIO ─── */
+  renderPortfolio() {
+    const grid = document.getElementById('portGrid');
+    const l = this.lang;
+    grid.innerHTML = this.portfolio.map(p => `
+      <div class="port-card fu">
+        <div class="port-img"><img src="${p.photo}" alt="${p.name}"></div>
+        <div class="port-body">
+          <div class="port-num">${p.num}</div>
+          <div class="port-cat">${p.cat}</div>
+          <div class="port-name">${p.name}</div>
+          <div class="port-loc">${p.loc}</div>
+          <div class="port-tags">${p.tags.map(t=>`<span>${t}</span>`).join('')}</div>
+          <div class="port-stats">
+            <div><strong>${p.stats.area}</strong>${TR[l].port_area||'Plocha'}</div>
+            <div><strong>${p.stats.year}</strong>${TR[l].port_year||'Rok'}</div>
+          </div>
+        </div>
+      </div>
+    `).join('');
+    this.refreshObservers();
+  },
+
+  /* ─── CANVAS TOPO ─── */
+  initCanvas() {
+    const c = document.getElementById('topoCanvas');
+    const ctx = c.getContext('2d');
+    let t = 0;
+    const colors = ['rgba(90,120,85,','rgba(168,136,64,','rgba(120,158,114,'];
+
+    function resize() {
+      c.width = c.parentElement.offsetWidth;
+      c.height = c.parentElement.offsetHeight;
+    }
+    resize();
+    window.addEventListener('resize', resize);
+
+    function noise(x, y, seed) {
+      return Math.sin(x*0.008+seed)*Math.cos(y*0.006+seed*1.3)
+           + Math.sin(x*0.015+y*0.012+seed*2.1)*0.5
+           + Math.cos(x*0.004-y*0.009+seed*0.7)*0.3;
+    }
+
+    function draw() {
+      t++;
+      const seed = t * 0.0004;
+      const w = c.width, h = c.height;
+      ctx.clearRect(0, 0, w, h);
+      const step = 12;
+      const levels = 14;
+
+      for (let lv = 0; lv < levels; lv++) {
+        const threshold = -1.5 + (lv / levels) * 3;
+        const col = colors[lv % colors.length];
+        const alpha = 0.05 + (lv % 5) * 0.018;
+        ctx.strokeStyle = col + alpha + ')';
+        ctx.lineWidth = 0.8;
+        ctx.beginPath();
+
+        for (let x = 0; x < w; x += step) {
+          for (let y = 0; y < h; y += step) {
+            const tl = noise(x, y, seed);
+            const tr = noise(x + step, y, seed);
+            const br = noise(x + step, y + step, seed);
+            const bl = noise(x, y + step, seed);
+
+            const config = (tl > threshold ? 8 : 0) | (tr > threshold ? 4 : 0) | (br > threshold ? 2 : 0) | (bl > threshold ? 1 : 0);
+
+            const lerp = (a, b, va, vb) => a + (b - a) * ((threshold - va) / (vb - va || 1));
+
+            let segments = [];
+            switch(config) {
+              case 1: case 14: segments.push([x, lerp(y+step,y,bl,tl), lerp(x,x+step,bl,br), y+step]); break;
+              case 2: case 13: segments.push([lerp(x,x+step,bl,br), y+step, x+step, lerp(y+step,y,br,tr)]); break;
+              case 3: case 12: segments.push([x, lerp(y+step,y,bl,tl), x+step, lerp(y+step,y,br,tr)]); break;
+              case 4: case 11: segments.push([lerp(x,x+step,tl,tr), y, x+step, lerp(y,y+step,tr,br)]); break;
+              case 5: segments.push([x, lerp(y,y+step,tl,bl), lerp(x,x+step,tl,tr), y]); segments.push([lerp(x,x+step,bl,br), y+step, x+step, lerp(y+step,y,br,tr)]); break;
+              case 6: case 9: segments.push([lerp(x,x+step,tl,tr), y, lerp(x,x+step,bl,br), y+step]); break;
+              case 7: case 8: segments.push([x, lerp(y,y+step,tl,bl), lerp(x,x+step,tl,tr), y]); break;
+              case 10: segments.push([x, lerp(y,y+step,tl,bl), lerp(x,x+step,tl,tr), y]); segments.push([lerp(x,x+step,bl,br), y+step, x+step, lerp(y+step,y,br,tr)]); break;
+            }
+            segments.forEach(s => { ctx.moveTo(s[0],s[1]); ctx.lineTo(s[2],s[3]); });
+          }
+        }
+        ctx.stroke();
+      }
+      requestAnimationFrame(draw);
+    }
+    draw();
+  },
+
+  /* ─── OBSERVERS ─── */
+  initObservers() {
+    // Scroll reveal
+    this.revealObs = new IntersectionObserver((entries) => {
+      entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('vis'); this.revealObs.unobserve(e.target); }});
+    }, {threshold: 0.15});
+    document.querySelectorAll('.fu').forEach(el => this.revealObs.observe(el));
+
+    // Count-up
+    const countObs = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          this.countUp(e.target);
+          countObs.unobserve(e.target);
+        }
+      });
+    }, {threshold: 0.5});
+    document.querySelectorAll('.hs-n[data-count]').forEach(el => countObs.observe(el));
+
+    // Green line
+    const lineObs = new IntersectionObserver((entries) => {
+      entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('vis'); lineObs.unobserve(e.target); }});
+    }, {threshold: 0.3});
+    document.querySelectorAll('.green-line').forEach(el => lineObs.observe(el));
+
+    // Active nav
+    const sections = document.querySelectorAll('section[id]');
+    const navLinks = document.querySelectorAll('.nv-links a[href^="#"]');
+    const navObs = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          navLinks.forEach(a => a.classList.remove('act'));
+          const link = document.querySelector(`.nv-links a[href="#${e.target.id}"]`);
+          if (link) link.classList.add('act');
+        }
+      });
+    }, {threshold: 0.3, rootMargin: '-80px 0px -50% 0px'});
+    sections.forEach(s => navObs.observe(s));
+  },
+
+  refreshObservers() {
+    document.querySelectorAll('.fu:not(.vis)').forEach(el => {
+      if (this.revealObs) this.revealObs.observe(el);
+    });
+  },
+
+  countUp(el) {
+    const target = parseFloat(el.dataset.count);
+    const suffix = el.dataset.suffix || '';
+    const dec = parseInt(el.dataset.dec) || 0;
+    const duration = 1800;
+    const start = performance.now();
+
+    function update(now) {
+      const p = Math.min((now - start) / duration, 1);
+      const ease = 1 - Math.pow(1 - p, 4);
+      const current = target * ease;
+      el.textContent = (dec ? current.toFixed(dec) : Math.floor(current)) + suffix;
+      if (p < 1) requestAnimationFrame(update);
+    }
+    requestAnimationFrame(update);
+  },
+
+  /* ─── NAV SCROLL ─── */
+  initNav() {
+    const nav = document.getElementById('nav');
+    window.addEventListener('scroll', () => {
+      nav.classList.toggle('sc', window.scrollY > 50);
+    });
+  },
+
+  /* ─── AI ─── */
+  initAI() {
+    const file = document.getElementById('aiFile');
+    const preview = document.getElementById('aiPreview');
+    const btn = document.getElementById('aiBtn');
+
+    file.addEventListener('change', () => {
+      const f = file.files[0];
+      if (f) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          preview.src = e.target.result;
+          preview.style.display = 'block';
+          btn.disabled = false;
+          S._imgData = e.target.result;
+        };
+        reader.readAsDataURL(f);
+      }
+    });
+  },
+
+  async generateAI() {
+    const key = document.getElementById('aiKey').value.trim();
+    if (!key) { alert(this.lang==='cs'?'Zadejte API klíč.':'Enter API key.'); return; }
+    if (!this._imgData) { alert(this.lang==='cs'?'Nahrajte obrázek.':'Upload an image.'); return; }
+
+    const loading = document.getElementById('aiLoading');
+    const result = document.getElementById('aiResult');
+    const btn = document.getElementById('aiBtn');
+
+    loading.style.display = 'block';
+    result.style.display = 'none';
+    btn.disabled = true;
+
+    const base64 = this._imgData.split(',')[1];
+    const mediaType = this._imgData.split(';')[0].split(':')[1];
+
+    try {
+      const res = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-api-key': key,
+          'anthropic-version': '2023-06-01',
+          'anthropic-dangerous-direct-browser-access': 'true'
+        },
+        body: JSON.stringify({
+          model: 'claude-sonnet-4-20250514',
+          max_tokens: 1500,
+          messages: [{
+            role: 'user',
+            content: [
+              {type:'image',source:{type:'base64',media_type:mediaType,data:base64}},
+              {type:'text',text: this.lang==='cs'
+                ? 'Jsi expert na správu domů a zahrad. Podívej se na tento obrázek domu nebo zahrady a navrhni konkrétní úpravy a vylepšení. Odpověz česky, strukturovaně s odrážkami. Zaměř se na: vzhled, údržbu, zeleň, energetickou účinnost a hodnotu nemovitosti.'
+                : 'You are an expert in property and garden management. Look at this image of a house or garden and suggest specific improvements. Answer in English with bullet points. Focus on: appearance, maintenance, greenery, energy efficiency, and property value.'}
+            ]
+          }]
+        })
+      });
+      const data = await res.json();
+      if (data.content && data.content[0]) {
+        result.textContent = data.content[0].text;
+        result.style.display = 'block';
+      } else if (data.error) {
+        result.textContent = 'Error: ' + (data.error.message || JSON.stringify(data.error));
+        result.style.display = 'block';
+      }
+    } catch(e) {
+      result.textContent = 'Error: ' + e.message;
+      result.style.display = 'block';
+    }
+    loading.style.display = 'none';
+    btn.disabled = false;
+  },
+
+  /* ─── ADMIN ─── */
+  openAdmin() {
+    document.getElementById('adminOverlay').classList.add('open');
+    this.admTab(0);
+  },
+  closeAdmin() {
+    document.getElementById('adminOverlay').classList.remove('open');
+  },
+
+  admTab(i) {
+    document.querySelectorAll('#admTabs button').forEach((b,idx) => b.classList.toggle('on', idx===i));
+    const body = document.getElementById('admBody');
+    const panes = [this.admDashboard, this.admProps, this.admPortfolio, this.admSettings];
+    body.innerHTML = `<div class="adm-pane vis">${panes[i].call(this)}</div>`;
+  },
+
+  admDashboard() {
+    return `
+      <div class="adm-stat-grid">
+        <div class="adm-stat"><div class="n">${this.props.length}</div><div class="l">${this.lang==='cs'?'Nemovitostí':'Properties'}</div></div>
+        <div class="adm-stat"><div class="n">${this.portfolio.length}</div><div class="l">${this.lang==='cs'?'Portfolio projektů':'Portfolio projects'}</div></div>
+        <div class="adm-stat"><div class="n">${this.props.filter(p=>p.status==='available').length}</div><div class="l">${this.lang==='cs'?'Dostupných':'Available'}</div></div>
+      </div>
+    `;
+  },
+
+  admProps() {
+    const rows = this.props.map(p => `<tr>
+      <td>${p.name}</td><td>${p.city}</td><td>${p.type}</td><td>${this.fmtPrice(p.price)} Kč</td>
+      <td><button onclick="S.editProp('${p.id}')">✎</button><button class="del" onclick="S.delProp('${p.id}')">✕</button></td>
+    </tr>`).join('');
+    return `
+      <table class="adm-table"><thead><tr><th>${this.lang==='cs'?'Název':'Name'}</th><th>${this.lang==='cs'?'Město':'City'}</th><th>Typ</th><th>${this.lang==='cs'?'Cena':'Price'}</th><th></th></tr></thead><tbody>${rows}</tbody></table>
+      <button class="adm-save" onclick="S.editProp(null)">+ ${this.lang==='cs'?'Přidat nemovitost':'Add property'}</button>
+      <div id="propForm"></div>
+    `;
+  },
+
+  editProp(id) {
+    const p = id ? this.props.find(x=>x.id===id) : {id:'p'+Date.now(),name:'',city:'Praha',type:'pronajem',cat:'Byt',price:'0',area:'0',rooms:'',status:'available',desc:'',photos:['https://picsum.photos/seed/100/800/600']};
+    document.getElementById('propForm').innerHTML = `
+      <div class="adm-form" style="margin-top:1.5rem;padding:1.5rem;border:1px solid var(--ln)">
+        <h3>${id?'Editace':'Nová nemovitost'}</h3>
+        <div class="adm-form-row">
+          <div><label>Název</label><input id="pf_name" value="${p.name}"></div>
+          <div><label>Město</label><input id="pf_city" value="${p.city}"></div>
+        </div>
+        <div class="adm-form-row">
+          <div><label>Typ</label><select id="pf_type"><option value="pronajem"${p.type==='pronajem'?' selected':''}>Pronájem</option><option value="prodej"${p.type==='prodej'?' selected':''}>Prodej</option><option value="investice"${p.type==='investice'?' selected':''}>Investice</option></select></div>
+          <div><label>Kategorie</label><input id="pf_cat" value="${p.cat}"></div>
+        </div>
+        <div class="adm-form-row">
+          <div><label>Cena</label><input id="pf_price" type="number" value="${p.price}"></div>
+          <div><label>Plocha (m²)</label><input id="pf_area" type="number" value="${p.area}"></div>
+        </div>
+        <div class="adm-form-row">
+          <div><label>Pokoje</label><input id="pf_rooms" value="${p.rooms}"></div>
+          <div><label>Status</label><select id="pf_status"><option value="available"${p.status==='available'?' selected':''}>Dostupné</option><option value="reserved"${p.status==='reserved'?' selected':''}>Rezervováno</option><option value="sold"${p.status==='sold'?' selected':''}>Prodáno</option></select></div>
+        </div>
+        <label>Popis</label><textarea id="pf_desc">${p.desc}</textarea>
+        <label>Fotky (URL, oddělené čárkou)</label><input id="pf_photos" value="${p.photos.join(',')}">
+        <br><button class="adm-save" onclick="S.saveProp('${p.id}',${!!id})">Uložit</button>
+        <button class="adm-cancel" onclick="document.getElementById('propForm').innerHTML=''">Zrušit</button>
+      </div>
+    `;
+  },
+
+  saveProp(id, isEdit) {
+    const obj = {
+      id, name: document.getElementById('pf_name').value,
+      city: document.getElementById('pf_city').value,
+      type: document.getElementById('pf_type').value,
+      cat: document.getElementById('pf_cat').value,
+      price: document.getElementById('pf_price').value,
+      area: document.getElementById('pf_area').value,
+      rooms: document.getElementById('pf_rooms').value,
+      status: document.getElementById('pf_status').value,
+      desc: document.getElementById('pf_desc').value,
+      photos: document.getElementById('pf_photos').value.split(',').map(s=>s.trim()).filter(Boolean)
+    };
+    if (isEdit) { const i = this.props.findIndex(p=>p.id===id); if(i>=0) this.props[i]=obj; }
+    else this.props.push(obj);
+    this.save(); this.renderProps(); this.admTab(1);
+  },
+
+  delProp(id) {
+    if (!confirm(this.lang==='cs'?'Smazat nemovitost?':'Delete property?')) return;
+    this.props = this.props.filter(p=>p.id!==id);
+    this.save(); this.renderProps(); this.admTab(1);
+  },
+
+  admPortfolio() {
+    const rows = this.portfolio.map(p => `<tr>
+      <td>${p.name}</td><td>${p.loc}</td><td>${p.cat}</td>
+      <td><button onclick="S.editPort('${p.id}')">✎</button><button class="del" onclick="S.delPort('${p.id}')">✕</button></td>
+    </tr>`).join('');
+    return `
+      <table class="adm-table"><thead><tr><th>Název</th><th>Lokalita</th><th>Kategorie</th><th></th></tr></thead><tbody>${rows}</tbody></table>
+      <button class="adm-save" onclick="S.editPort(null)">+ ${this.lang==='cs'?'Přidat projekt':'Add project'}</button>
+      <div id="portForm"></div>
+    `;
+  },
+
+  editPort(id) {
+    const p = id ? this.portfolio.find(x=>x.id===id) : {id:'pf'+Date.now(),num:String(this.portfolio.length+1).padStart(2,'0'),cat:'',name:'',loc:'',photo:'https://picsum.photos/seed/200/600/400',tags:[],stats:{area:'',year:''}};
+    document.getElementById('portForm').innerHTML = `
+      <div class="adm-form" style="margin-top:1.5rem;padding:1.5rem;border:1px solid var(--ln)">
+        <h3>${id?'Editace':'Nový projekt'}</h3>
+        <div class="adm-form-row">
+          <div><label>Název</label><input id="ptf_name" value="${p.name}"></div>
+          <div><label>Lokalita</label><input id="ptf_loc" value="${p.loc}"></div>
+        </div>
+        <div class="adm-form-row">
+          <div><label>Kategorie</label><input id="ptf_cat" value="${p.cat}"></div>
+          <div><label>Číslo</label><input id="ptf_num" value="${p.num}"></div>
+        </div>
+        <div class="adm-form-row">
+          <div><label>Plocha</label><input id="ptf_area" value="${p.stats.area}"></div>
+          <div><label>Rok</label><input id="ptf_year" value="${p.stats.year}"></div>
+        </div>
+        <label>Foto URL</label><input id="ptf_photo" value="${p.photo}">
+        <label>Tagy (čárkou)</label><input id="ptf_tags" value="${p.tags.join(',')}">
+        <br><button class="adm-save" onclick="S.savePort('${p.id}',${!!id})">Uložit</button>
+        <button class="adm-cancel" onclick="document.getElementById('portForm').innerHTML=''">Zrušit</button>
+      </div>
+    `;
+  },
+
+  savePort(id, isEdit) {
+    const obj = {
+      id, num: document.getElementById('ptf_num').value,
+      cat: document.getElementById('ptf_cat').value,
+      name: document.getElementById('ptf_name').value,
+      loc: document.getElementById('ptf_loc').value,
+      photo: document.getElementById('ptf_photo').value,
+      tags: document.getElementById('ptf_tags').value.split(',').map(s=>s.trim()).filter(Boolean),
+      stats: { area: document.getElementById('ptf_area').value, year: document.getElementById('ptf_year').value }
+    };
+    if (isEdit) { const i = this.portfolio.findIndex(p=>p.id===id); if(i>=0) this.portfolio[i]=obj; }
+    else this.portfolio.push(obj);
+    this.save(); this.renderPortfolio(); this.admTab(2);
+  },
+
+  delPort(id) {
+    if (!confirm(this.lang==='cs'?'Smazat projekt?':'Delete project?')) return;
+    this.portfolio = this.portfolio.filter(p=>p.id!==id);
+    this.save(); this.renderPortfolio(); this.admTab(2);
+  },
+
+  admSettings() {
+    return `
+      <div class="adm-form">
+        <h3>${this.lang==='cs'?'Nastavení webu':'Site settings'}</h3>
+        <label>Titulek webu</label><input id="set_title" value="${this.siteTitle}">
+        <label>${this.lang==='cs'?'Adresa':'Address'}</label><input id="set_addr" value="${this.contact.address}">
+        <label>${this.lang==='cs'?'Telefon':'Phone'}</label><input id="set_phone" value="${this.contact.phone}">
+        <label>Email</label><input id="set_email" value="${this.contact.email}">
+        <label>${this.lang==='cs'?'Pracovní hodiny':'Working hours'}</label><input id="set_hours" value="${this.contact.hours}">
+        <br><button class="adm-save" onclick="S.saveSettings()">Uložit</button>
+      </div>
+    `;
+  },
+
+  saveSettings() {
+    this.siteTitle = document.getElementById('set_title').value;
+    this.contact.address = document.getElementById('set_addr').value;
+    this.contact.phone = document.getElementById('set_phone').value;
+    this.contact.email = document.getElementById('set_email').value;
+    this.contact.hours = document.getElementById('set_hours').value;
+    document.title = this.siteTitle;
+    this.save();
+    alert(this.lang==='cs'?'Nastavení uloženo.':'Settings saved.');
+  }
+};
+
+/* ─── TRANSLATIONS ─── */
+const TR = {
+  cs: {
+    hero_eyebrow:'Správa domů & zahrad · Celá ČR',
+    hero_h1:'Péče o domy<br><em>a zahrady</em>',
+    hero_b1:'Kompletní správa domu — nájemníci, inkaso, technika.',
+    hero_b2:'Péče o zahradu po celý rok — sekání, výsadba, návrhy.',
+    hero_b3:'Investiční výnos 5–6,1 % zajištěný vlastnickým právem.',
+    hero_btn1:'Domluvit konzultaci',hero_btn2:'Jak fungujeme →',
+    hero_card:'Správa domů & zahrad po celé ČR',
+    stat1:'Spravovaných\nobjektů',stat2:'Let\nzkušeností',stat3:'Roční výnos\npro investory',
+    nav_services:'Správa',nav_listings:'Nabídka',nav_portfolio:'Portfolio',
+    nav_ai:'AI návrh',nav_contact:'Kontakt',nav_cta:'Konzultace',nav_admin:'Admin',
+    srv_eyb:'Co děláme',srv_h2:'Správa domů <em>a zahrad</em>',
+    srv_desc:'Staráme se o vaše nemovitosti a zahrady s maximální péčí. Od technické správy po kompletní údržbu zeleně — vše řešíme za vás.',
+    s1n:'Správa domu',s1d:'Nájemníci, inkaso, technická správa',
+    s2n:'Správa zahrady',s2d:'Sekání, výsadba, sezónní péče',
+    s3n:'Pronájmy',s3d:'Vyhledání nájemníků, smlouvy, kontroly',
+    s4n:'Prodeje',s4d:'Oceňování, marketing, právní servis',
+    s5n:'Technická správa',s5d:'Revize, opravy, rekonstrukce',
+    s6n:'Investice',s6d:'Výnos 5–6,1 %, vlastnické právo, měsíční výplata',
+    why_h:'Proč NovaDom?',
+    w1:'12 let zkušeností se správou nemovitostí',
+    w2:'350+ spokojených klientů po celé ČR',
+    w3:'Garantovaný výnos 5–6,1 % ročně',
+    w4:'Kompletní servis od A do Z',
+    srv_cap:'Správa zahrad · NovaDom',
+    yield_t:'Roční výnos zajištěný nemovitostí<br>Měsíční výplata od 9 000 Kč',
+    nab_eyb:'Nabídka',nab_h2:'Nemovitosti <em>v nabídce</em>',
+    f_all:'Vše',f_rent:'Pronájem',f_sale:'Prodej',f_inv:'Investice',
+    f_all_city:'Všechna města',
+    no_props:'Žádné nemovitosti v této kategorii.',
+    st_avail:'Dostupné',st_res:'Rezervováno',st_sold:'Prodáno',
+    port_eyb:'Portfolio',port_h2:'Naše <em>realizace</em>',
+    port_desc:'Vybrané projekty, na které jsme hrdí. Každý z nich svědčí o kvalitě naší práce.',
+    port_area:'Plocha',port_year:'Rok',
+    ai_eyb:'AI návrh',ai_h2:'Nechte AI <em>navrhnout</em>',
+    ai_desc:'Nahrajte fotku svého domu nebo zahrady a naše AI vám navrhne úpravy a vylepšení.',
+    ai_upload:'Klikněte nebo přetáhněte fotku sem',
+    ai_btn:'Generovat návrh',ai_loading:'⏳ Generuji návrh...',
+    ai_key_ph:'Anthropic API klíč (sk-ant-...)',
+    kon_eyb:'Kontakt',kon_h2:'Spojte se <em>s námi</em>',
+    kon_info_h:'Máte zájem? Ozvěte se.',
+    kon_addr_l:'Adresa:',kon_addr:'Staroměstské nám. 1, 110 00 Praha 1',
+    kon_tel_l:'Telefon:',kon_hours_l:'Pracovní hodiny:',kon_hours:'Po–Pá 8:00–17:00',
+    f_name_l:'Jméno',f_name_ph:'Vaše jméno',f_tel_l:'Telefon',
+    f_msg_l:'Zpráva',f_msg_ph:'Jak vám můžeme pomoci?',f_submit:'Odeslat zprávu',
+    foot_desc:'Profesionální správa domů, zahrad a nemovitostí po celé České republice. Váš partner pro bydlení i investice.',
+    foot_nav:'Navigace',foot_services:'Služby',foot_legal:'Právní',
+    foot_privacy:'Ochrana osobních údajů',foot_terms:'Obchodní podmínky',foot_cookies:'Cookies',
+    foot_rights:'Všechna práva vyhrazena.',foot_made:'Vytvořeno s péčí v Praze',
+    adm_props:'Nemovitosti',adm_settings:'Nastavení',
+    ticker:'Správa domů · Správa zahrad · Pronájmy · Prodeje · Investice · Technická správa · SVJ · Revize'
+  },
+  en: {
+    hero_eyebrow:'Property & Garden Management · Czech Republic',
+    hero_h1:'Caring for homes<br><em>and gardens</em>',
+    hero_b1:'Complete property management — tenants, billing, maintenance.',
+    hero_b2:'Year-round garden care — mowing, planting, design.',
+    hero_b3:'Investment yield 5–6.1% secured by ownership rights.',
+    hero_btn1:'Book a consultation',hero_btn2:'How we work →',
+    hero_card:'Property & garden management across CZ',
+    stat1:'Managed\nproperties',stat2:'Years of\nexperience',stat3:'Annual return\nfor investors',
+    nav_services:'Services',nav_listings:'Listings',nav_portfolio:'Portfolio',
+    nav_ai:'AI Design',nav_contact:'Contact',nav_cta:'Consultation',nav_admin:'Admin',
+    srv_eyb:'What we do',srv_h2:'Property <em>& garden</em> management',
+    srv_desc:'We take care of your properties and gardens with maximum attention. From technical management to complete green maintenance — we handle everything for you.',
+    s1n:'Property management',s1d:'Tenants, billing, technical management',
+    s2n:'Garden care',s2d:'Mowing, planting, seasonal care',
+    s3n:'Rentals',s3d:'Tenant search, contracts, inspections',
+    s4n:'Sales',s4d:'Valuation, marketing, legal services',
+    s5n:'Technical management',s5d:'Inspections, repairs, renovations',
+    s6n:'Investments',s6d:'Yield 5–6.1%, ownership rights, monthly payout',
+    why_h:'Why NovaDom?',
+    w1:'12 years of property management experience',
+    w2:'350+ satisfied clients across Czech Republic',
+    w3:'Guaranteed yield of 5–6.1% annually',
+    w4:'Complete A-to-Z service',
+    srv_cap:'Garden care · NovaDom',
+    yield_t:'Annual return secured by property<br>Monthly payout from 9,000 CZK',
+    nab_eyb:'Listings',nab_h2:'Properties <em>on offer</em>',
+    f_all:'All',f_rent:'Rental',f_sale:'Sale',f_inv:'Investment',
+    f_all_city:'All cities',
+    no_props:'No properties in this category.',
+    st_avail:'Available',st_res:'Reserved',st_sold:'Sold',
+    port_eyb:'Portfolio',port_h2:'Our <em>projects</em>',
+    port_desc:'Selected projects we are proud of. Each one demonstrates the quality of our work.',
+    port_area:'Area',port_year:'Year',
+    ai_eyb:'AI Design',ai_h2:'Let AI <em>design it</em>',
+    ai_desc:'Upload a photo of your house or garden and our AI will suggest improvements.',
+    ai_upload:'Click or drag a photo here',
+    ai_btn:'Generate design',ai_loading:'⏳ Generating design...',
+    ai_key_ph:'Anthropic API key (sk-ant-...)',
+    kon_eyb:'Contact',kon_h2:'Get in <em>touch</em>',
+    kon_info_h:'Interested? Reach out.',
+    kon_addr_l:'Address:',kon_addr:'Staroměstské nám. 1, 110 00 Prague 1',
+    kon_tel_l:'Phone:',kon_hours_l:'Working hours:',kon_hours:'Mon–Fri 8:00–17:00',
+    f_name_l:'Name',f_name_ph:'Your name',f_tel_l:'Phone',
+    f_msg_l:'Message',f_msg_ph:'How can we help you?',f_submit:'Send message',
+    foot_desc:'Professional property, garden and real estate management across the Czech Republic. Your partner for living and investment.',
+    foot_nav:'Navigation',foot_services:'Services',foot_legal:'Legal',
+    foot_privacy:'Privacy policy',foot_terms:'Terms & conditions',foot_cookies:'Cookies',
+    foot_rights:'All rights reserved.',foot_made:'Made with care in Prague',
+    adm_props:'Properties',adm_settings:'Settings',
+    ticker:'Property mgmt · Garden care · Rentals · Sales · Investments · Technical mgmt · HOA · Inspections'
+  }
+};
+
+/* ─── INIT ─── */
+document.addEventListener('DOMContentLoaded', () => S.init());
+</script>
+</body>
+</html>
